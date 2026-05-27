@@ -1,6 +1,8 @@
+import os
+import sys
 import platform
 from getpass import getuser
-from importlib.metadata import distributions
+import importlib.metadata
 from itertools import zip_longest
 
 STYLE="\033[1;33m"
@@ -16,13 +18,22 @@ def get_header():
 	return header, sep
 
 def get_sys_info():
-	packages_count=len(list(distributions()))
+	try:
+		importlib_version = importlib.metadata.version("pip")
+	except importlib.metadata.PackageNotFoundError:
+		importlib_version = "N/A"
+	packages_count=len(list(importlib.metadata.distributions()))
 
 	info=[]
+	info.append(("OS", os.name))
 	info.append(("Python", platform.python_version()))
+	info.append(("API", str(sys.api_version)))
 	info.append(("Interpreter", platform.python_implementation()))
+	info.append(("Optimization Flag", str(sys.flags.optimize)))
+	info.append(("Executable", sys.executable))
 	info.append(("Architecture", platform.architecture()[0]))
 	info.append(("Compiler", platform.python_compiler()))
+	info.append(("Pip", importlib_version))
 	info.append(("Packages", str(packages_count)+" (pip)"))
 
 	return info
@@ -36,6 +47,6 @@ with open("logo.txt", "r", encoding="utf-8") as f:
 header, sep = get_header()
 TEXT=[header,sep]+styled_info
 for logo_line, text_line in zip_longest(LOGO, TEXT, fillvalue=""):
-	print(logo_line.ljust(25)+"    "+text_line)
+	print(logo_line.ljust(1)+"    "+text_line)
 
 #print(*TEXT, sep='\n')
